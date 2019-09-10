@@ -21,9 +21,8 @@ actions:
       port: 5555
     output:
       type: any
-forwards:
+forward:
   blog:
-    help: The blog system
     http:
       path: /
-      port: 5555
+      port: 5556

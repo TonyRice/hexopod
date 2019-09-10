@@ -32,10 +32,10 @@ const blog = new Koa();
 
 blog.use(serve('./blog/public'));
 
-app.use(mount('/', blog));
-
 app.use(body());
 app.use(router.routes());
+
+blog.listen(5556)
 
 app.listen(5555);
 
