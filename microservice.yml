@@ -1,0 +1,29 @@
+omg: 1
+info:
+  version: 0.0.1
+  title: Hexopod
+  description: A basic OMG service implemented using js-ipfs
+  license:
+    name: Apache 2.0
+    url: https://opensource.org/licenses/Apache-2.0
+lifecycle:
+  startup:
+    command: ["node", "/app/src/index.js"]
+health:
+  http:
+    path: /health
+    port: 5555
+actions:
+  deploy:
+    http:
+      path: /deploy
+      method: post
+      port: 5555
+    output:
+      type: any
+forwards:
+  blog:
+    help: The blog system
+    http:
+      path: /
+      port: 5555

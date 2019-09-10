@@ -1,0 +1,32 @@
+{
+  "name": "hexopod",
+  "version": "0.0.1",
+  "description": "A simple microservice allowing you to deploy, and build a static Hexo blog",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TonyRice/hexo-service.git"
+  },
+  "author": "Tony Rice",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/TonyRice/hexoservice/issues"
+  },
+  "homepage": "https://github.com/TonyRice/hexoservice#readme",
+  "keywords": [
+    "microservice",
+    "omg"
+  ],
+  "dependencies": {
+    "koa": "^2.7.0",
+    "koa-json-body": "^5.3.0",
+    "koa-mount": "^4.0.0",
+    "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
+    "nodegit": "^0.25.1",
+    "npm": "^6.11.3"
+  }
+}
