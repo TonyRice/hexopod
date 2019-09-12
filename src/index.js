@@ -9,6 +9,8 @@ const path = require('path');
 const extname = path.extname;
 const fs = require('fs');
 
+const mime = require('mime-types');
+
 // This tells us that the service is currently
 // deploying the latest version of the blog.
 const deployment = require('./deployment_service');
@@ -59,7 +61,7 @@ router.post('/get_resource', (ctx, next) => {
                 let data = fs.readFileSync(fpath.toString())
                 ctx.body = {
                     'data': data.toString(),
-                    'type': extname(fpath)
+                    'type': mime.lookup(extname(fpath))
                 }
             } else {
                 ctx.body = "not found"
