@@ -53,12 +53,20 @@ router.post('/get_resource', (ctx, next) => {
 
             rpath = rpath === '/' ? "/index.html" : rpath;
 
-            const fpath = path.join(__dirname, "../blog/public", rpath);
+            let fpath = path.join(__dirname, "../blog/public", rpath);
 
-            const fstat = await stat(fpath);
+            let fstat = await stat(fpath);
+
+            if (fstat.isDirectory()) {
+                let index = path.join(fpath, "index.html");
+                if (fs.existsSync(index)) {
+                    fpath = index;
+                    fstat = await stat(fpath)
+                }
+            }
 
             if (fstat.isFile()) {
-                let data = fs.readFileSync(fpath.toString())
+                let data = fs.readFileSync(fpath);
                 ctx.body = {
                     'data': data.toString(),
                     'type': mime.lookup(extname(fpath))
