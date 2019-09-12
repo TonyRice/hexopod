@@ -14,15 +14,28 @@ health:
     path: /health
     port: 5555
 actions:
-  deploy:
+  deployBlog:
+    help: Deploys and builds the hexo based blog from the GIT_REPO environmental variable
     http:
       path: /deploy
       method: post
       port: 5555
     output:
       type: any
-forward:
-  blog:
+  getBlogResource:
+    help: Retrieves a resource from the blog, allowing you to servce it back via the http service
     http:
-      path: /
-      port: 5556
+      path: /get_resource
+      method: post
+      port: 5555
+    arguments:
+      path:
+        type: string
+        required: true
+        in: requestBody
+      method:
+        type: string
+        required: false
+        in: requestBody
+    output:
+      type: any

@@ -5,12 +5,25 @@ const GIT_REPO = process.env.GIT_REPO ? process.env.GIT_REPO : 'https://github.c
 const Koa = require('koa');
 const router = require('koa-router')();
 const body = require('koa-json-body');
+const path = require('path');
+const extname = path.extname;
+const fs = require('fs');
 
 // This tells us that the service is currently
 // deploying the latest version of the blog.
-const mount = require('koa-mount')
-const serve = require('koa-static')
-const deployment = require('./deployment_service')
+const deployment = require('./deployment_service');
+
+function stat(file) {
+    return new Promise(function(resolve, reject) {
+        fs.stat(file, function(err, stat) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(stat);
+            }
+        });
+    });
+}
 
 router.get('/health', ctx => {
     ctx.body = 'OK';
@@ -23,19 +36,49 @@ router.post('/deploy', (ctx, next) => {
     }).catch(() => {
         ctx.body = 'FAILED';
         next();
-    })
+    });
+});
+
+// This allows us to create a simple proxy
+// interface in the cloud.
+router.post('/get_resource', (ctx, next) => {
+    return new Promise(async (resolve) => {
+        try {
+
+            let rpath = ctx.request.body["path"];
+
+            rpath = rpath ? rpath : "/index.html";
+
+            rpath = rpath === '/' ? "/index.html" : rpath;
+
+            const fpath = path.join(__dirname, "../blog/public", rpath);
+
+            const fstat = await stat(fpath);
+
+            if (fstat.isFile()) {
+                let data = fs.readFileSync(fpath.toString())
+                ctx.body = {
+                    'data': data.toString(),
+                    'type': extname(fpath)
+                }
+            } else {
+                ctx.body = "not found"
+            }
+        } catch (e) {
+            ctx.body = e.toString()
+        }
+
+        resolve();
+    }).then(() => {
+        next();
+    });
 });
 
 const app = new Koa();
 
-const blog = new Koa();
-
-blog.use(serve('./blog/public'));
-
 app.use(body());
-app.use(router.routes());
 
-blog.listen(5556)
+app.use(router.routes());
 
 app.listen(5555);
 

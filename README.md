@@ -10,7 +10,9 @@ Storyscript Usage
 
 ```coffee
 
-status = TonyRice/hexopod deploy
+status = TonyRice/hexopod deployBlog
+
+resource = TonyRice/hexopod getBlogResource path: "/"
 
 log info msg: "deployed {status}"
 
