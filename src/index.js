@@ -41,6 +41,57 @@ router.post('/deploy', (ctx, next) => {
     });
 });
 
+async function getResourceFromPath(rpath){
+
+    rpath = rpath ? rpath : "/index.html";
+
+    rpath = rpath === '/' ? "/index.html" : rpath;
+
+    let fpath = path.join(__dirname, "../blog/public", rpath);
+
+    let fstat = await stat(fpath);
+
+    if (fstat.isDirectory()) {
+        let index = path.join(fpath, "index.html");
+        if (fs.existsSync(index)) {
+            fpath = index;
+            fstat = await stat(fpath)
+        }
+    }
+
+    if (fstat.isFile()) {
+        return fpath
+    }
+
+    return null
+}
+
+
+// This allows us to create a simple proxy
+// interface in the cloud.
+router.post('/content_type', (ctx, next) => {
+    return new Promise(async (resolve) => {
+        try {
+
+            let rpath = ctx.request.body["path"];
+
+            const fpath = await getResourceFromPath(rpath);
+
+            if (fpath !== null) {
+                ctx.body = mime.lookup(extname(fpath))
+            } else {
+                ctx.body = "not found"
+            }
+        } catch (e) {
+            ctx.body = e.toString()
+        }
+
+        resolve();
+    }).then(() => {
+        next();
+    });
+});
+
 // This allows us to create a simple proxy
 // interface in the cloud.
 router.post('/get_resource', (ctx, next) => {
@@ -49,28 +100,10 @@ router.post('/get_resource', (ctx, next) => {
 
             let rpath = ctx.request.body["path"];
 
-            rpath = rpath ? rpath : "/index.html";
+            const fpath = await getResourceFromPath(rpath);
 
-            rpath = rpath === '/' ? "/index.html" : rpath;
-
-            let fpath = path.join(__dirname, "../blog/public", rpath);
-
-            let fstat = await stat(fpath);
-
-            if (fstat.isDirectory()) {
-                let index = path.join(fpath, "index.html");
-                if (fs.existsSync(index)) {
-                    fpath = index;
-                    fstat = await stat(fpath)
-                }
-            }
-
-            if (fstat.isFile()) {
-                let data = fs.readFileSync(fpath);
-                ctx.body = {
-                    'data': data.toString(),
-                    'type': mime.lookup(extname(fpath))
-                }
+            if (fpath !== null) {
+                ctx.body = fs.readFileSync(fpath)
             } else {
                 ctx.body = "not found"
             }

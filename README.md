@@ -10,10 +10,25 @@ Storyscript Usage
 
 ```coffee
 
-status = TonyRice/hexopod deployBlog
+TonyRice/hexopod deploy
 
-resource = TonyRice/hexopod getBlogResource path: "/"
+http server as server
+    # Note: wildcards are currently not supported in the latest
+    # Storyscript Cloud
+    when server listen method: "get" path: "/*" as r
 
-log info msg: "deployed {status}"
+        path = r.path.replace(item: "/blog/" by: "/")
+        
+        # we need to retrieve the content-type first
+        content_type = TonyRice/hexopod content_type path: r.path.replace(item: "/blog/" by: "/")
+        
+        if content_type == null
+             content_type = "application/octet-stream"
+
+        r set_header key: "Content-Type" value: content_type
+        
+        # this will allow us to write the data of the resource
+        r write content: TonyRice/hexopod get_resource path: r.path.replace(item: "/blog/" by: "/")
+
 
 ```
