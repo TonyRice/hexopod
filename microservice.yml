@@ -2,7 +2,7 @@ omg: 1
 info:
   version: 0.0.1
   title: Hexopod
-  description: A basic OMG service implemented using js-ipfs
+  description: A basic OMG service allowing you to deploy a static hexo based blog.
   license:
     name: Apache 2.0
     url: https://opensource.org/licenses/Apache-2.0
@@ -14,12 +14,17 @@ health:
     path: /health
     port: 5555
 actions:
-  deploy:
-    help: Deploys and builds the hexo based blog from the GIT_REPO environmental variable
+  init:
+    help: Initializes and builds the hexo based blog supplied git repo
     http:
       path: /deploy
       method: post
       port: 5555
+    arguments:
+      repo:
+        type: string
+        required: true
+        in: requestBody
     output:
       type: any
   get_resource:

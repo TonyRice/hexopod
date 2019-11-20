@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-
-const GIT_REPO = process.env.GIT_REPO ? process.env.GIT_REPO : 'https://github.com/TonyRice/hexoblog.git';
-
 const Koa = require('koa');
 const router = require('koa-router')();
 const body = require('koa-json-body');
@@ -31,9 +28,14 @@ router.get('/health', ctx => {
     ctx.body = 'OK';
 });
 
-router.post('/deploy', (ctx, next) => {
-    return deployment.build(GIT_REPO).then((path) =>{
+
+let REPO_INITIALIZED = false;
+
+router.post('/init', (ctx, next) => {
+    let repo = ctx.request.body["repo"]
+    return deployment.build(repo).then((path) =>{
         ctx.body = 'OK';
+        REPO_INITIALIZED = true;
         next();
     }).catch(() => {
         ctx.body = 'FAILED';
@@ -72,6 +74,10 @@ async function getResourceFromPath(rpath){
 router.post('/content_type', (ctx, next) => {
     return new Promise(async (resolve) => {
         try {
+            if (!REPO_INITIALIZED) {
+                ctx.body = "blog not initialized.";
+                return resolve();
+            }
 
             let rpath = ctx.request.body["path"];
 
@@ -97,6 +103,10 @@ router.post('/content_type', (ctx, next) => {
 router.post('/get_resource', (ctx, next) => {
     return new Promise(async (resolve) => {
         try {
+            if (!REPO_INITIALIZED) {
+                ctx.body = "blog not initialized.";
+                return resolve();
+            }
 
             let rpath = ctx.request.body["path"];
 
@@ -124,6 +134,4 @@ app.use(body());
 app.use(router.routes());
 
 app.listen(5555);
-
-
 console.log(`Listening on localhost:5555`);

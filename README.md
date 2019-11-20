@@ -1,34 +1,31 @@
 # Hexopod
 
 ![Microservice](https://img.shields.io/badge/microservice-ready-brightgreen.svg?style=for-the-badge)
-[![Build status](https://img.shields.io/travis/com/microservices/node/master.svg?style=for-the-badge)](https://travis-ci.com/microservices/node)
 
-An OMG Microservice for deploying a Hexo blog
+An OMG Microservice for deploying a Hexo based blog
 
 Storyscript Usage
 -----
 
 ```coffee
+TonyRice/hexopod init repo: "https://github.com/TonyRice/hexoblog.git"
 
-TonyRice/hexopod deploy
+when http server listen method: "get" path: "/*" as r
+    r set_header key: "Content-Type" value: get_content_type(path: r.path)
+    r write content: get_content(path: r.path)                            
 
-http server as server
-    # Note: wildcards are currently not supported in the latest
-    # Storyscript Cloud
-    when server listen method: "get" path: "/*" as r
+function clean_path path: any returns string
+    return (path to string).replace(item: "/blog/" by: "/")
 
-        path = r.path.replace(item: "/blog/" by: "/")
-        
-        # we need to retrieve the content-type first
-        content_type = TonyRice/hexopod content_type path: r.path.replace(item: "/blog/" by: "/")
-        
-        if content_type == null
-             content_type = "application/octet-stream"
+function get_content_type path: any returns string
+    path = clean_path(path: path)
+    content_type = (TonyRice/hexopod content_type path: path) to string
 
-        r set_header key: "Content-Type" value: content_type
-        
-        # this will allow us to write the data of the resource
-        r write content: TonyRice/hexopod get_resource path: r.path.replace(item: "/blog/" by: "/")
+    if content_type == null
+         content_type = "application/octet-stream"
 
+    return content_type          
 
+function retrieve_blog_content path: any returns any
+    return TonyRice/hexopod get_resource path: clean_path(path: path)
 ```
